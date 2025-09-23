@@ -5,6 +5,9 @@ from models.game_engine import GameEngine, ShotData, ShotType, ShotOutcome
 
 
 def test_process_turn_fails_when_game_not_started():
+    """
+    Attempting to process a turn when the game state is NOT_STARTED should fail gracefully.
+    """
     player_a = Player("A")
     player_b = Player("B")
     player_c = Player("C")
