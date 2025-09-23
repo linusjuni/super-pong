@@ -2,6 +2,7 @@ import customtkinter as ctk
 from models.player import Player
 from models.team import Team
 from models.tournament import Tournament
+from ui.colors import COLORS
 
 
 class StartPage(ctk.CTkFrame):
@@ -9,14 +10,14 @@ class StartPage(ctk.CTkFrame):
         super().__init__(master, *args, **kwargs)
         self.controller = controller
 
-        self.configure(fg_color=["#f8fafc", "#0f172a"])
+        self.configure(fg_color=[COLORS.bg_primary_light, COLORS.bg_primary_dark])
 
         # Title
         title = ctk.CTkLabel(
             self,
             text="🏆 Super Pong Tournament Setup",
             font=ctk.CTkFont(size=32, weight="bold"),
-            text_color=["#1e293b", "#f1f5f9"],
+            text_color=[COLORS.text_primary_dark, COLORS.text_primary_light],
         )
         title.pack(pady=(30, 20))
 
@@ -25,19 +26,19 @@ class StartPage(ctk.CTkFrame):
             self,
             text="Create your teams and get ready to compete!",
             font=ctk.CTkFont(size=16),
-            text_color=["#64748b", "#94a3b8"],
+            text_color=[COLORS.text_secondary_dark, COLORS.text_secondary_light],
         )
         subtitle.pack(pady=(0, 30))
 
         # Scrollable container
         self.team_container = ctk.CTkScrollableFrame(
             self,
-            fg_color=["#f1f5f9", "#1e293b"],
+            fg_color=[COLORS.bg_secondary_light, COLORS.bg_secondary_dark],
             width=750,
             height=450,
             corner_radius=20,
-            scrollbar_button_color=["#e2e8f0", "#475569"],
-            scrollbar_button_hover_color=["#cbd5e1", "#64748b"],
+            scrollbar_button_color=[COLORS.grey_primary, COLORS.grey_secondary],
+            scrollbar_button_hover_color=[COLORS.grey_hover, COLORS.grey_hover],
         )
         self.team_container.pack(fill="both", expand=True, padx=30, pady=20)
 
@@ -54,9 +55,9 @@ class StartPage(ctk.CTkFrame):
             height=45,
             corner_radius=25,
             font=ctk.CTkFont(size=16, weight="bold"),
-            fg_color=["#3b82f6", "#2563eb"],
-            hover_color=["#2563eb", "#1d4ed8"],
-            text_color="white",
+            fg_color=[COLORS.blue_primary, COLORS.blue_secondary],
+            hover_color=[COLORS.blue_hover, COLORS.blue_hover],
+            text_color=COLORS.text_primary_light,
         )
         add_team_btn.pack(side="left", padx=(0, 15))
 
@@ -68,9 +69,9 @@ class StartPage(ctk.CTkFrame):
             height=45,
             corner_radius=25,
             font=ctk.CTkFont(size=16, weight="bold"),
-            fg_color=["#10b981", "#059669"],
-            hover_color=["#059669", "#047857"],
-            text_color="white",
+            fg_color=[COLORS.green_primary, COLORS.green_secondary],
+            hover_color=[COLORS.green_hover, COLORS.green_hover],
+            text_color=COLORS.text_primary_light,
         )
         start_btn.pack(side="left", padx=15)
 
@@ -82,9 +83,9 @@ class StartPage(ctk.CTkFrame):
             height=45,
             corner_radius=25,
             font=ctk.CTkFont(size=16, weight="bold"),
-            fg_color=["#ef4444", "#dc2626"],
-            hover_color=["#dc2626", "#b91c1c"],
-            text_color="white",
+            fg_color=[COLORS.red_primary, COLORS.red_secondary],
+            hover_color=[COLORS.red_hover, COLORS.red_hover],
+            text_color=COLORS.text_primary_light,
         )
         reset_btn.pack(side="left", padx=(15, 0))
 
@@ -99,17 +100,17 @@ class StartPage(ctk.CTkFrame):
         # Create a card-style frame for the team
         team_frame = ctk.CTkFrame(
             self.team_container,
-            fg_color=["#ffffff", "#334155"],
+            fg_color=[COLORS.bg_primary_light, COLORS.bg_primary_dark],
             corner_radius=15,
             border_width=2,
-            border_color=["#e2e8f0", "#475569"],
+            border_color=[COLORS.grey_primary, COLORS.grey_secondary],
         )
         team_frame.pack(fill="x", pady=15, padx=20)
         team_frame.grid_columnconfigure(1, weight=1)
 
         # Team header
         header_frame = ctk.CTkFrame(
-            team_frame, fg_color=["#f8fafc", "#475569"], corner_radius=10, height=40
+            team_frame, fg_color=[COLORS.bg_secondary_light, COLORS.bg_secondary_dark], corner_radius=10, height=40
         )
         header_frame.grid(
             row=0, column=0, columnspan=2, sticky="ew", padx=20, pady=(20, 15)
@@ -119,7 +120,7 @@ class StartPage(ctk.CTkFrame):
             header_frame,
             text=f"Team {self.team_count}",
             font=ctk.CTkFont(size=20, weight="bold"),
-            text_color=["#1e293b", "#f1f5f9"],
+            text_color=[COLORS.text_primary_dark, COLORS.text_primary_light],
         )
         team_header.pack(pady=8)
 
@@ -128,7 +129,7 @@ class StartPage(ctk.CTkFrame):
             team_frame,
             text="Team Name:",
             font=ctk.CTkFont(size=14, weight="bold"),
-            text_color=["#374151", "#d1d5db"],
+            text_color=[COLORS.text_secondary_dark, COLORS.text_secondary_light],
         )
         team_label.grid(row=1, column=0, padx=(20, 10), pady=10, sticky="w")
 
@@ -138,8 +139,8 @@ class StartPage(ctk.CTkFrame):
             height=35,
             corner_radius=10,
             border_width=2,
-            border_color=["#d1d5db", "#6b7280"],
-            fg_color=["#ffffff", "#374151"],
+            border_color=[COLORS.grey_primary, COLORS.grey_secondary],
+            fg_color=[COLORS.bg_primary_light, COLORS.bg_primary_dark],
             placeholder_text="Enter team name...",
             font=ctk.CTkFont(size=14),
         )
@@ -150,7 +151,7 @@ class StartPage(ctk.CTkFrame):
             team_frame,
             text="Player 1:",
             font=ctk.CTkFont(size=14, weight="bold"),
-            text_color=["#374151", "#d1d5db"],
+            text_color=[COLORS.text_secondary_dark, COLORS.text_secondary_light],
         )
         player1_label.grid(row=2, column=0, padx=(20, 10), pady=10, sticky="w")
 
@@ -160,8 +161,8 @@ class StartPage(ctk.CTkFrame):
             height=35,
             corner_radius=10,
             border_width=2,
-            border_color=["#d1d5db", "#6b7280"],
-            fg_color=["#ffffff", "#374151"],
+            border_color=[COLORS.grey_primary, COLORS.grey_secondary],
+            fg_color=[COLORS.bg_primary_light, COLORS.bg_primary_dark],
             placeholder_text="Enter player 1 name...",
             font=ctk.CTkFont(size=14),
         )
@@ -172,7 +173,7 @@ class StartPage(ctk.CTkFrame):
             team_frame,
             text="Player 2:",
             font=ctk.CTkFont(size=14, weight="bold"),
-            text_color=["#374151", "#d1d5db"],
+            text_color=[COLORS.text_secondary_dark, COLORS.text_secondary_light],
         )
         player2_label.grid(row=3, column=0, padx=(20, 10), pady=10, sticky="w")
 
@@ -182,8 +183,8 @@ class StartPage(ctk.CTkFrame):
             height=35,
             corner_radius=10,
             border_width=2,
-            border_color=["#d1d5db", "#6b7280"],
-            fg_color=["#ffffff", "#374151"],
+            border_color=[COLORS.grey_primary, COLORS.grey_secondary],
+            fg_color=[COLORS.bg_primary_light, COLORS.bg_primary_dark],
             placeholder_text="Enter player 2 name...",
             font=ctk.CTkFont(size=14),
         )
@@ -198,7 +199,7 @@ class StartPage(ctk.CTkFrame):
             toggle_frame,
             text="Team Status:",
             font=ctk.CTkFont(size=14, weight="bold"),
-            text_color=["#374151", "#d1d5db"],
+            text_color=[COLORS.text_secondary_dark, COLORS.text_secondary_light],
         )
         status_label.pack(side="left", padx=(0, 10))
 
@@ -216,10 +217,10 @@ class StartPage(ctk.CTkFrame):
             ),
             width=120,
             font=ctk.CTkFont(size=14, weight="bold"),
-            progress_color=["#22c55e", "#10b981"],
-            button_color=["#515151", "#515151"],
-            button_hover_color=["#343434", "#343434"],
-            text_color=["#374151", "#d1d5db"],
+            progress_color=[COLORS.green_primary, COLORS.green_secondary],
+            button_color=[COLORS.grey_primary, COLORS.grey_secondary],
+            button_hover_color=[COLORS.grey_hover, COLORS.grey_hover],
+            text_color=[COLORS.text_secondary_dark, COLORS.text_secondary_light],
         )
         lock_toggle.pack(side="left", padx=10)
 
@@ -228,7 +229,7 @@ class StartPage(ctk.CTkFrame):
             toggle_frame,
             text="🔓 Not Locked",
             font=ctk.CTkFont(size=12, weight="bold"),
-            text_color=["#ef4444", "#fca5a5"],
+            text_color=[COLORS.red_secondary, COLORS.red_primary],
         )
         status_indicator.pack(side="left", padx=(10, 0))
 
@@ -280,7 +281,7 @@ class StartPage(ctk.CTkFrame):
             # Change frame appearance to locked state
             team_frame.configure(
                 fg_color=["#dcfce7", "#1f2937"],
-                border_color=["#22c55e", "#10b981"],
+                border_color=[COLORS.green_primary, COLORS.green_secondary],
             )
             
             # Update status indicator
@@ -300,14 +301,14 @@ class StartPage(ctk.CTkFrame):
             
             # Reset frame appearance
             team_frame.configure(
-                fg_color=["#ffffff", "#334155"],
-                border_color=["#e2e8f0", "#475569"],
+                fg_color=[COLORS.bg_primary_light, COLORS.bg_primary_dark],
+                border_color=[COLORS.grey_primary, COLORS.grey_secondary],
             )
             
             # Update status indicator
             status_indicator.configure(
                 text="🔓 Not Locked",
-                text_color=["#ef4444", "#fca5a5"]
+                text_color=[COLORS.red_secondary, COLORS.red_primary]
             )
             
             # Update toggle text
@@ -379,10 +380,10 @@ class StartPage(ctk.CTkFrame):
         """Show an error message with modern styling."""
         error_frame = ctk.CTkFrame(
             self,
-            fg_color=["#fef2f2", "#7f1d1d"],
+            fg_color=[COLORS.error_bg_light, COLORS.error_bg_dark],
             corner_radius=15,
             border_width=2,
-            border_color=["#fca5a5", "#ef4444"],
+            border_color=[COLORS.error_border_light, COLORS.error_border_dark],
         )
         error_frame.place(relx=0.5, rely=0.5, anchor="center")
 
@@ -390,7 +391,7 @@ class StartPage(ctk.CTkFrame):
             error_frame,
             text=f"⚠️ {message}",
             font=ctk.CTkFont(size=16, weight="bold"),
-            text_color=["#dc2626", "#fca5a5"],
+            text_color=[COLORS.red_secondary, COLORS.red_primary],
         )
         error_label.pack(padx=30, pady=20)
 
