@@ -391,7 +391,7 @@ class StartPage(ctk.CTkFrame):
         # Use controller to create tournament
         error_message = self.tournament_controller.create_tournament(teams_data)
 
-        if error_message:
+        if error_message is not None:
             self.show_error(error_message)
             return
 

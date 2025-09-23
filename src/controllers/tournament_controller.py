@@ -60,4 +60,4 @@ class TournamentController:
             print(f"  Team: {team_data.team_name}")
             print(f"    Players: {team_data.player1_name}, {team_data.player2_name}")
 
-        return ""  # Empty string means success
+        return None # Return None on success
