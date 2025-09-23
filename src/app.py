@@ -12,13 +12,13 @@ class SuperPongApp(ctk.CTk):
         self.resizable(True, True)
         self.minsize(800, 700)
 
-        # Modern gradient-like background
+        # Background
         self.configure(fg_color=["#f8fafc", "#0f172a"])
 
         # Central application state
         self.app_state = AppState()
 
-        # Modern container with updated styling
+        # Container for all frames
         container = ctk.CTkFrame(self, fg_color="transparent", corner_radius=0)
         container.pack(fill="both", expand=True, padx=20, pady=20)
         container.grid_rowconfigure(0, weight=1)
@@ -39,7 +39,6 @@ class SuperPongApp(ctk.CTk):
 
 
 if __name__ == "__main__":
-    # Set modern theme
     ctk.set_appearance_mode("system")
     ctk.set_default_color_theme("blue")
 
