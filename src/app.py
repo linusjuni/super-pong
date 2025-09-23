@@ -2,7 +2,7 @@ import customtkinter as ctk
 from ui.app_state import AppState
 from ui.views.start_page import StartPage
 from ui.views.setup_complete_page import SetupCompletePage
-
+from ui.colors import COLORS
 
 class SuperPongApp(ctk.CTk):
     def __init__(self):
@@ -13,7 +13,7 @@ class SuperPongApp(ctk.CTk):
         self.minsize(800, 700)
 
         # Background
-        self.configure(fg_color=["#f8fafc", "#0f172a"])
+        self.configure(fg_color=[COLORS.bg_primary_light, COLORS.bg_primary_dark])
 
         # Central application state
         self.app_state = AppState()
