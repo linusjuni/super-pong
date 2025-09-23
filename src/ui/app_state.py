@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import Optional
 from models.game import Game
 from models.game_engine import GameEngine
 from models.tournament import Tournament
@@ -6,6 +7,6 @@ from models.tournament import Tournament
 
 @dataclass
 class AppState:
-    game: Game | None = None
-    engine: GameEngine | None = None
-    tournament: Tournament | None = None
+    game: Optional[Game] = None
+    engine: Optional[GameEngine] = None
+    tournament: Optional[Tournament] = None

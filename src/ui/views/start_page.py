@@ -1,7 +1,5 @@
 import customtkinter as ctk
-from models.player import Player
-from models.team import Team
-from models.tournament import Tournament
+from controllers.tournament_controller import TournamentController, TeamData
 from ui.colors import COLORS
 
 
@@ -9,6 +7,9 @@ class StartPage(ctk.CTkFrame):
     def __init__(self, master, controller, *args, **kwargs):
         super().__init__(master, *args, **kwargs)
         self.controller = controller
+
+        # Initialize tournament controller
+        self.tournament_controller = TournamentController(self.controller.app_state)
 
         self.configure(fg_color=[COLORS.bg_primary_light, COLORS.bg_primary_dark])
 
@@ -77,7 +78,7 @@ class StartPage(ctk.CTkFrame):
 
         reset_btn = ctk.CTkButton(
             button_frame,
-            text="🔄 Reset",
+            text="🔥 Reset",
             command=self.reset_fields,
             width=200,
             height=45,
@@ -369,9 +370,8 @@ class StartPage(ctk.CTkFrame):
         team_entry["locked"] = is_locked
 
     def start_tournament(self):
-        """Start the tournament with proper team creation."""
+        """Start the tournament using the controller."""
         teams_data = []
-        locked_teams = 0
 
         for team in self.team_entries:
             team_name = team["team_name"].get().strip()
@@ -380,51 +380,20 @@ class StartPage(ctk.CTkFrame):
 
             if team_name and player1_name and player2_name:
                 teams_data.append(
-                    {
-                        "team_name": team_name,
-                        "player1_name": player1_name,
-                        "player2_name": player2_name,
-                        "locked": team["locked"],
-                    }
+                    TeamData(
+                        team_name=team_name,
+                        player1_name=player1_name,
+                        player2_name=player2_name,
+                        locked=team["locked"],
+                    )
                 )
-                if team["locked"]:
-                    locked_teams += 1
 
-        if len(teams_data) < 2:
-            self.show_error("Need at least 2 teams to start tournament!")
+        # Use controller to create tournament
+        error_message = self.tournament_controller.create_tournament(teams_data)
+
+        if error_message:
+            self.show_error(error_message)
             return
-
-        if locked_teams != len(teams_data):
-            self.show_error("Please lock in all teams before starting!")
-            return
-
-        # Create the tournament
-        tournament = Tournament("Super Pong Tournament")
-
-        # Create Player and Team objects
-        created_teams = []
-        for team_data in teams_data:
-            # Create player objects
-            player1 = Player(team_data["player1_name"])
-            player2 = Player(team_data["player2_name"])
-
-            # Create team object
-            team = Team(player1, player2, team_data["team_name"])
-            created_teams.append(team)
-
-            # Add team to tournament
-            tournament.add_team(team)
-
-        # Start the tournament
-        tournament.start_tournament()
-
-        # Store in app state
-        self.controller.app_state.tournament = tournament
-
-        print(f"Successfully created tournament with {len(created_teams)} teams:")
-        for team in created_teams:
-            print(f"  Team: {team.name}")
-            print(f"    Players: {team.player1.name}, {team.player2.name}")
 
         # Navigate to the next page
         self.controller.show_frame("SetupCompletePage")
