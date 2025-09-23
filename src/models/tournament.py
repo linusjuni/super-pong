@@ -20,3 +20,13 @@ class Tournament:
         self.started_at: Optional[datetime] = None
         self.finished_at: Optional[datetime] = None
         self.winner: Optional[Team] = None
+
+
+    def add_team(self, team: Team) -> None:
+        """Add a team to the tournament"""
+        self.teams.append(team)
+
+
+    def start_tournament(self) -> None:
+        """Mark tournament as started"""
+        self.started_at = datetime.now()
