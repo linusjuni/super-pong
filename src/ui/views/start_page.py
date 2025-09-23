@@ -110,11 +110,15 @@ class StartPage(ctk.CTkFrame):
 
         # Team header
         header_frame = ctk.CTkFrame(
-            team_frame, fg_color=[COLORS.bg_secondary_light, COLORS.bg_secondary_dark], corner_radius=10, height=40
+            team_frame,
+            fg_color=[COLORS.bg_secondary_light, COLORS.bg_secondary_dark],
+            corner_radius=10,
+            height=40,
         )
         header_frame.grid(
             row=0, column=0, columnspan=2, sticky="ew", padx=20, pady=(20, 15)
         )
+        header_frame.grid_columnconfigure(0, weight=1)
 
         team_header = ctk.CTkLabel(
             header_frame,
@@ -122,7 +126,22 @@ class StartPage(ctk.CTkFrame):
             font=ctk.CTkFont(size=20, weight="bold"),
             text_color=[COLORS.text_primary_dark, COLORS.text_primary_light],
         )
-        team_header.pack(pady=8)
+        team_header.grid(row=0, column=0, pady=8, sticky="w", padx=(15, 0))
+
+        # Remove button in header
+        remove_btn = ctk.CTkButton(
+            header_frame,
+            text="🗑️",
+            command=lambda: self.remove_team(team_frame),
+            width=35,
+            height=30,
+            corner_radius=8,
+            font=ctk.CTkFont(size=14, weight="bold"),
+            fg_color=[COLORS.red_primary, COLORS.red_secondary],
+            hover_color=[COLORS.red_hover, COLORS.red_hover],
+            text_color=COLORS.text_primary_light,
+        )
+        remove_btn.grid(row=0, column=1, pady=8, padx=(0, 15), sticky="e")
 
         # Team name entry
         team_label = ctk.CTkLabel(
@@ -234,86 +253,118 @@ class StartPage(ctk.CTkFrame):
         status_indicator.pack(side="left", padx=(10, 0))
 
         # Store the entries and frame for later use
-        self.team_entries.append(
-            {
-                "frame": team_frame,
-                "team_name": team_name_entry,
-                "player1": player1_entry,
-                "player2": player2_entry,
-                "lock_toggle": lock_toggle,
-                "status_indicator": status_indicator,
-                "locked": False,
-            }
-        )
+        team_entry = {
+            "frame": team_frame,
+            "team_name": team_name_entry,
+            "player1": player1_entry,
+            "player2": player2_entry,
+            "lock_toggle": lock_toggle,
+            "status_indicator": status_indicator,
+            "locked": False,
+            "team_number": self.team_count,
+            "header_label": team_header,
+        }
+        self.team_entries.append(team_entry)
 
-    def toggle_team_lock(self, team_frame, team_name_entry, player1_entry, player2_entry, lock_toggle, status_indicator):
+    def remove_team(self, team_frame_to_remove):
+        """Remove a specific team entry."""
+        # Find the team entry to remove
+        team_to_remove = None
+        for team_entry in self.team_entries:
+            if team_entry["frame"] == team_frame_to_remove:
+                team_to_remove = team_entry
+                break
+
+        if team_to_remove:
+            # Remove from the list
+            self.team_entries.remove(team_to_remove)
+            team_frame_to_remove.destroy()
+            self.renumber_teams()
+
+    def renumber_teams(self):
+        """Renumber all remaining teams sequentially."""
+        for i, team_entry in enumerate(self.team_entries, 1):
+            team_entry["team_number"] = i
+            team_entry["header_label"].configure(text=f"Team {i}")
+
+        # Update the team count to reflect the current number of teams
+        self.team_count = len(self.team_entries)
+
+    def toggle_team_lock(
+        self,
+        team_frame,
+        team_name_entry,
+        player1_entry,
+        player2_entry,
+        lock_toggle,
+        status_indicator,
+    ):
         """Handle the team lock toggle."""
         is_locked = lock_toggle.get()
-        
+
         # Find the team entry
         team_entry = None
         for entry in self.team_entries:
             if entry["lock_toggle"] == lock_toggle:
                 team_entry = entry
                 break
-        
+
         if not team_entry:
             return
-        
+
         # Validate fields before locking
         if is_locked:
             team_name = team_name_entry.get().strip()
             player1_name = player1_entry.get().strip()
             player2_name = player2_entry.get().strip()
-            
+
             if not team_name or not player1_name or not player2_name:
                 # Reset toggle and show error
                 lock_toggle.deselect()
                 self.show_error("Please fill in all fields before locking!")
                 return
-        
+
         if is_locked:
             # Lock the team
             team_name_entry.configure(state="disabled")
             player1_entry.configure(state="disabled")
             player2_entry.configure(state="disabled")
-            
+
             # Change frame appearance to locked state
             team_frame.configure(
                 fg_color=["#dcfce7", "#1f2937"],
                 border_color=[COLORS.green_primary, COLORS.green_secondary],
             )
-            
+
             # Update status indicator
             status_indicator.configure(
-                text="🔒 Locked In",
-                text_color=["#15803d", "#22c55e"]
+                text="🔒 Locked In", text_color=["#15803d", "#22c55e"]
             )
-            
+
             # Update toggle text
             lock_toggle.configure(text="🔓 Unlock Team")
-            
+
         else:
             # Unlock the team
             team_name_entry.configure(state="normal")
             player1_entry.configure(state="normal")
             player2_entry.configure(state="normal")
-            
+
             # Reset frame appearance
             team_frame.configure(
                 fg_color=[COLORS.bg_primary_light, COLORS.bg_primary_dark],
                 border_color=[COLORS.grey_primary, COLORS.grey_secondary],
             )
-            
+
             # Update status indicator
             status_indicator.configure(
                 text="🔓 Not Locked",
-                text_color=[COLORS.red_secondary, COLORS.red_primary]
+                text_color=[COLORS.red_secondary, COLORS.red_primary],
             )
-            
+
             # Update toggle text
             lock_toggle.configure(text="🔒 Lock In Team")
-        
+
         # Update the stored state
         team_entry["locked"] = is_locked
 
@@ -328,12 +379,14 @@ class StartPage(ctk.CTkFrame):
             player2_name = team["player2"].get().strip()
 
             if team_name and player1_name and player2_name:
-                teams_data.append({
-                    "team_name": team_name,
-                    "player1_name": player1_name,
-                    "player2_name": player2_name,
-                    "locked": team["locked"],
-                })
+                teams_data.append(
+                    {
+                        "team_name": team_name,
+                        "player1_name": player1_name,
+                        "player2_name": player2_name,
+                        "locked": team["locked"],
+                    }
+                )
                 if team["locked"]:
                     locked_teams += 1
 
@@ -347,24 +400,24 @@ class StartPage(ctk.CTkFrame):
 
         # Create the tournament
         tournament = Tournament("Super Pong Tournament")
-        
+
         # Create Player and Team objects
         created_teams = []
         for team_data in teams_data:
             # Create player objects
             player1 = Player(team_data["player1_name"])
             player2 = Player(team_data["player2_name"])
-            
+
             # Create team object
             team = Team(player1, player2, team_data["team_name"])
             created_teams.append(team)
-            
+
             # Add team to tournament
             tournament.add_team(team)
 
         # Start the tournament
         tournament.start_tournament()
-        
+
         # Store in app state
         self.controller.app_state.tournament = tournament
 
@@ -373,7 +426,7 @@ class StartPage(ctk.CTkFrame):
             print(f"  Team: {team.name}")
             print(f"    Players: {team.player1.name}, {team.player2.name}")
 
-        # Navigate to the next page    
+        # Navigate to the next page
         self.controller.show_frame("SetupCompletePage")
 
     def show_error(self, message):
