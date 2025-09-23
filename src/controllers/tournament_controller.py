@@ -3,6 +3,7 @@ from typing import List
 from models.player import Player
 from models.team import Team
 from models.tournament import Tournament
+from models.game_engine import GameEngine
 
 
 @dataclass
@@ -50,9 +51,13 @@ class TournamentController:
 
         # Start the tournament
         tournament.start_tournament()
+        tournament.schedule_round_robin()
 
         # Store in app state
         self.app_state.tournament = tournament
+        if tournament.current_game:
+            self.app_state.game = tournament.current_game
+            self.app_state.engine = GameEngine(tournament.current_game)
 
         # Log success
         print(f"Successfully created tournament with {len(teams_data)} teams:")
