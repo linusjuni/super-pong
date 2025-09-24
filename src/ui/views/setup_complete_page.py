@@ -58,7 +58,7 @@ class SetupCompletePage(ctk.CTkFrame):
             hover_color=[COLORS.grey_hover, COLORS.grey_hover],
             text_color=COLORS.text_primary_light,
         )
-        back_btn.pack(pady=(10,20)
+        back_btn.pack(pady=(10,20))
 
         # Container for the round-robin schedule
         self.rounds_container = ctk.CTkScrollableFrame(
