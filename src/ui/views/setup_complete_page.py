@@ -14,7 +14,7 @@ class SetupCompletePage(ctk.CTkFrame):
             text="🎉",
             font=ctk.CTkFont(size=80),
         )
-        success_label.pack(pady=(50, 20))
+        success_label.pack(pady=(30, 20))
 
         title = ctk.CTkLabel(
             self,
@@ -30,7 +30,7 @@ class SetupCompletePage(ctk.CTkFrame):
             font=ctk.CTkFont(size=16),
             text_color=[COLORS.text_secondary_dark, COLORS.text_secondary_light],
         )
-        subtitle.pack(pady=(0, 50))
+        subtitle.pack(pady=(0, 20))
 
         # Action buttons
         start_games_btn = ctk.CTkButton(
@@ -44,7 +44,7 @@ class SetupCompletePage(ctk.CTkFrame):
             hover_color=[COLORS.green_hover, COLORS.green_hover],
             text_color=COLORS.text_primary_light,
         )
-        start_games_btn.pack(pady=20)
+        start_games_btn.pack(pady=10)
 
         back_btn = ctk.CTkButton(
             self,
@@ -58,7 +58,7 @@ class SetupCompletePage(ctk.CTkFrame):
             hover_color=[COLORS.grey_hover, COLORS.grey_hover],
             text_color=COLORS.text_primary_light,
         )
-        back_btn.pack(pady=10)
+        back_btn.pack(pady=(10,20)
 
         # Container for the round-robin schedule
         self.rounds_container = ctk.CTkScrollableFrame(
@@ -82,27 +82,6 @@ class SetupCompletePage(ctk.CTkFrame):
 
         tournament = self.controller.app_state.tournament
 
-        if tournament is None:
-            message = ctk.CTkLabel(
-                self.rounds_container,
-                text="No tournament data available.",
-                font=ctk.CTkFont(size=16, weight="bold"),
-                text_color=[COLORS.text_secondary_dark, COLORS.text_secondary_light],
-            )
-            message.pack(pady=20)
-            return
-
-        if not tournament.rounds:
-            message = ctk.CTkLabel(
-                self.rounds_container,
-                text="Add more teams to generate a schedule where everyone plays each other once.",
-                font=ctk.CTkFont(size=16, weight="bold"),
-                wraplength=520,
-                text_color=[COLORS.text_secondary_dark, COLORS.text_secondary_light],
-            )
-            message.pack(pady=20, padx=20)
-            return
-
         for round_index, games in enumerate(tournament.rounds, start=1):
             round_card = ctk.CTkFrame(
                 self.rounds_container,
@@ -118,9 +97,9 @@ class SetupCompletePage(ctk.CTkFrame):
                 text=f"Round {round_index}",
                 font=ctk.CTkFont(size=18, weight="bold"),
                 text_color=[COLORS.text_primary_dark, COLORS.text_primary_light],
-                anchor="w",
+                anchor="center",
             )
-            header.pack(fill="x", padx=20, pady=(20, 10))
+            header.pack(fill="x", padx=20, pady=(20, 0))
 
             if not games:
                 bye_label = ctk.CTkLabel(
@@ -132,12 +111,15 @@ class SetupCompletePage(ctk.CTkFrame):
                 bye_label.pack(padx=20, pady=(0, 20))
                 continue
 
-            for game in games:
+            for idx, game in enumerate(games):
                 matchup_label = ctk.CTkLabel(
                     round_card,
-                    text=f"{game.team1.name} vs {game.team2.name}",
+                    text=f"{game.team1.name} VS {game.team2.name}",
                     font=ctk.CTkFont(size=16),
                     text_color=[COLORS.text_secondary_dark, COLORS.text_secondary_light],
-                    anchor="w",
+                    anchor="center",
                 )
-                matchup_label.pack(fill="x", padx=30, pady=6)
+                if idx == len(games)-1:
+                    matchup_label.pack(fill="x", padx=30, pady=(0,20))
+                else:
+                    matchup_label.pack(fill="x", padx=30, pady=(0,0))

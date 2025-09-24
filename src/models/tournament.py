@@ -38,13 +38,6 @@ class Tournament:
         """Generate a round-robin schedule where every team plays each other once."""
         total_teams = len(self.teams)
 
-        if total_teams < 2:
-            # Not enough teams to form games
-            self.rounds = []
-            self.games = []
-            self.current_game = None
-            self.current_round_index = None
-            return
 
         # Use a copy so we do not mutate the original order of teams
         rotating_teams: List[Optional[Team]] = self.teams.copy()
