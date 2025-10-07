@@ -695,13 +695,26 @@ class GamePlayPage(ctk.CTkFrame):
             'TRICKSHOT': ShotType.TRICKSHOT
         }
         
+        # Check if both shots hit - potential balls back situation
+        both_hit = (shot1_data['outcome'].upper() == 'HIT' and 
+                   shot2_data['outcome'].upper() == 'HIT')
+        
+        # If both hit, ask if they went into the same cup
+        same_cup = False
+        if both_hit:
+            same_cup = self.ask_same_cup_dialog()
+        
+        # Assign cup positions if both hit same cup
+        cup_position_1 = "cup_1" if same_cup else None
+        cup_position_2 = "cup_1" if same_cup else None
+        
         # Create ShotData objects
         shot1 = ShotData(
             player=player1,
             shot_type=shot_type_mapping.get(shot1_data['shot_type'].upper(), ShotType.NORMAL),
             outcome=ShotOutcome[shot1_data['outcome'].upper()],
             elbow_violation=False,  # TODO: Connect to elbow tracking
-            cup_position=None,
+            cup_position=cup_position_1,
             bounces=shot1_data.get('bounces')
         )
         
@@ -710,7 +723,7 @@ class GamePlayPage(ctk.CTkFrame):
             shot_type=shot_type_mapping.get(shot2_data['shot_type'].upper(), ShotType.NORMAL),
             outcome=ShotOutcome[shot2_data['outcome'].upper()],
             elbow_violation=False,  # TODO: Connect to elbow tracking
-            cup_position=None,
+            cup_position=cup_position_2,
             bounces=shot2_data.get('bounces')
         )
         
@@ -820,6 +833,90 @@ class GamePlayPage(ctk.CTkFrame):
 
         # Auto-dismiss after 2 seconds
         self.after(2000, error_frame.destroy)
+
+    def ask_same_cup_dialog(self):
+        """
+        Show a dialog asking if both balls went into the same cup.
+        Returns True if same cup, False otherwise.
+        """
+        # Create a modal dialog
+        dialog = ctk.CTkToplevel(self)
+        dialog.title("Two Balls One Cup?")
+        dialog.geometry("450x250")
+        dialog.transient(self)
+        dialog.grab_set()  # Make it modal
+        
+        # Center the dialog
+        dialog.update_idletasks()
+        x = (dialog.winfo_screenwidth() // 2) - (450 // 2)
+        y = (dialog.winfo_screenheight() // 2) - (250 // 2)
+        dialog.geometry(f"450x250+{x}+{y}")
+        
+        # Variable to store the result
+        result = {"same_cup": False}
+        
+        # Main container
+        container = ctk.CTkFrame(
+            dialog,
+            fg_color=[COLORS.bg_secondary_light, COLORS.bg_secondary_dark]
+        )
+        container.pack(fill="both", expand=True, padx=20, pady=20)
+        
+        # Question label
+        question_label = ctk.CTkLabel(
+            container,
+            text="🎯 Both balls hit!\n\nDid they go into the SAME cup?",
+            font=ctk.CTkFont(size=18, weight="bold"),
+            text_color=[COLORS.text_primary_dark, COLORS.text_primary_light],
+            justify="center",
+        )
+        question_label.pack(pady=(20, 30))
+        
+        # Button frame
+        button_frame = ctk.CTkFrame(container, fg_color="transparent")
+        button_frame.pack(pady=10, padx=20, fill="x")
+        button_frame.grid_columnconfigure((0, 1), weight=1)
+        
+        def on_yes():
+            result["same_cup"] = True
+            dialog.destroy()
+        
+        def on_no():
+            result["same_cup"] = False
+            dialog.destroy()
+        
+        # Yes button (Same cup - Two balls one cup!)
+        yes_btn = ctk.CTkButton(
+            button_frame,
+            text="✅ YES\n(Same Cup)",
+            command=on_yes,
+            height=70,
+            corner_radius=12,
+            font=ctk.CTkFont(size=16, weight="bold"),
+            fg_color=[COLORS.green_primary, COLORS.green_secondary],
+            hover_color=[COLORS.green_hover, COLORS.green_hover],
+            text_color=COLORS.text_primary_light,
+        )
+        yes_btn.grid(row=0, column=0, padx=10, sticky="ew")
+        
+        # No button (Different cups - Balls back!)
+        no_btn = ctk.CTkButton(
+            button_frame,
+            text="❌ NO\n(Different Cups)",
+            command=on_no,
+            height=70,
+            corner_radius=12,
+            font=ctk.CTkFont(size=16, weight="bold"),
+            fg_color=[COLORS.blue_primary, COLORS.blue_secondary],
+            hover_color=[COLORS.blue_hover, COLORS.blue_hover],
+            text_color=COLORS.text_primary_light,
+        )
+        no_btn.grid(row=0, column=1, padx=10, sticky="ew")
+        
+        # Wait for the dialog to be closed
+        self.wait_window(dialog)
+        
+        return result["same_cup"]
 
     def on_show(self):
         """Called when the page is shown."""
