@@ -36,6 +36,7 @@ class SetupCompletePage(ctk.CTkFrame):
         start_games_btn = ctk.CTkButton(
             self,
             text="🎯 Start Games",
+            command=lambda: self.controller.show_frame("GamePlayPage"),
             width=250,
             height=50,
             corner_radius=25,

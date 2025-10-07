@@ -2,7 +2,9 @@ import customtkinter as ctk
 from ui.app_state import AppState
 from ui.views.start_page import StartPage
 from ui.views.setup_complete_page import SetupCompletePage
+from ui.views.game_play_page import GamePlayPage
 from ui.colors import COLORS
+
 
 class SuperPongApp(ctk.CTk):
     def __init__(self):
@@ -25,7 +27,7 @@ class SuperPongApp(ctk.CTk):
         container.grid_columnconfigure(0, weight=1)
 
         self.frames = {}
-        for F in (StartPage, SetupCompletePage):
+        for F in (StartPage, SetupCompletePage, GamePlayPage):
             name = F.__name__
             frame = F(container, controller=self)
             frame.grid(row=0, column=0, sticky="nsew")
