@@ -63,6 +63,7 @@ export default function GamePlay() {
   const [outcome, setOutcome] = useState(null);
   const [bounces, setBounces] = useState(null);
   const [elbowViolation, setElbowViolation] = useState(false);
+  const [cupPosition, setCupPosition] = useState(null);
   const [submitting, setSubmitting] = useState(false);
 
   // --- Timer state ---
@@ -193,6 +194,7 @@ export default function GamePlay() {
     setOutcome(null);
     setBounces(null);
     setElbowViolation(false);
+    setCupPosition(null);
   };
 
   const handleLogShot = async () => {
@@ -208,6 +210,7 @@ export default function GamePlay() {
         outcome,
         bounces: shotType === "bounce" ? bounces : null,
         elbow_violation: elbowViolation,
+        cup_position: outcome === "hit" ? cupPosition : null,
       });
       await fetchShots();
       resetForm();
@@ -430,13 +433,53 @@ export default function GamePlay() {
                     key={o}
                     variant={outcome === o ? "default" : "outline"}
                     className="flex-1"
-                    onClick={() => setOutcome(o)}
+                    onClick={() => {
+                      setOutcome(o);
+                      if (o !== "hit") setCupPosition(null);
+                    }}
                   >
                     {outcomeLabel[o]}
                   </Button>
                 ))}
               </div>
             </div>
+
+            {/* Cup position — only for hits */}
+            {outcome === "hit" && (() => {
+              const rows =
+                game.starting_cups_per_team === 10
+                  ? [[1], [2, 3], [4, 5, 6], [7, 8, 9, 10]]
+                  : [[1], [2, 3], [4, 5, 6]];
+              return (
+                <div>
+                  <p className="mb-1.5 text-sm font-medium text-muted-foreground">
+                    Cup Position <span className="text-xs font-normal">(optional)</span>
+                  </p>
+                  <div className="flex flex-col items-center gap-1.5">
+                    {rows.map((row, ri) => (
+                      <div key={ri} className="flex gap-1.5">
+                        {row.map((n) => (
+                          <button
+                            key={n}
+                            type="button"
+                            onClick={() =>
+                              setCupPosition(cupPosition === n ? null : n)
+                            }
+                            className={`flex h-9 w-9 items-center justify-center rounded-full border text-sm font-medium transition-colors ${
+                              cupPosition === n
+                                ? "bg-primary text-primary-foreground border-primary"
+                                : "bg-background hover:bg-accent border-input"
+                            }`}
+                          >
+                            {n}
+                          </button>
+                        ))}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            })()}
 
             {/* Elbow violation */}
             <label className="flex items-center gap-2 cursor-pointer">
@@ -509,6 +552,11 @@ export default function GamePlay() {
                         >
                           {outcomeLabel[shot.outcome]}
                         </Badge>
+                        {shot.outcome === "hit" && shot.cup_position && (
+                          <span className="text-xs text-muted-foreground">
+                            Cup {shot.cup_position}
+                          </span>
+                        )}
                         {shot.elbow_violation && (
                           <Badge variant="destructive" className="text-xs">
                             Elbow

@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { tournamentApi, gameApi } from "@/services/api";
+import { tournamentApi, gameApi, playerApi, punishmentBongApi } from "@/services/api";
 import { Button } from "@/components/ui/button";
-import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
@@ -41,6 +41,14 @@ export default function GamesList() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // Punishment bongs
+  const [punishmentBongs, setPunishmentBongs] = useState([]);
+  const [playerMap, setPlayerMap] = useState({});
+  const [pbDialogOpen, setPbDialogOpen] = useState(false);
+  const [pbPlayerId, setPbPlayerId] = useState(null);
+  const [pbNote, setPbNote] = useState("");
+  const [pbSubmitting, setPbSubmitting] = useState(false);
+
   // Delete game
   const [deletingId, setDeletingId] = useState(null);
 
@@ -68,14 +76,23 @@ export default function GamesList() {
 
   const fetchData = async () => {
     try {
-      const [t, tm, g] = await Promise.all([
+      const [t, tm, g, pbs] = await Promise.all([
         tournamentApi.get(tournamentId),
         tournamentApi.getTeams(tournamentId),
         tournamentApi.getGames(tournamentId),
+        punishmentBongApi.list(tournamentId),
       ]);
       setTournament(t);
       setTeams(tm);
       setGames(g);
+      setPunishmentBongs(pbs);
+
+      // Build player map from unique player IDs in teams
+      const playerIds = [...new Set(tm.flatMap((team) => [team.player1_id, team.player2_id]))];
+      const players = await Promise.all(playerIds.map((id) => playerApi.get(id)));
+      const pMap = {};
+      for (const p of players) pMap[p.id] = p;
+      setPlayerMap(pMap);
     } catch (e) {
       setError(e.message);
     } finally {
@@ -130,6 +147,43 @@ export default function GamesList() {
       setCreating(false);
     }
   };
+
+  // Punishment bong handlers
+  const handleCreatePunishmentBong = async () => {
+    if (!pbPlayerId) return;
+    setPbSubmitting(true);
+    try {
+      await punishmentBongApi.create(tournamentId, {
+        player_id: pbPlayerId,
+        note: pbNote.trim() || null,
+      });
+      setPbDialogOpen(false);
+      setPbPlayerId(null);
+      setPbNote("");
+      const pbs = await punishmentBongApi.list(tournamentId);
+      setPunishmentBongs(pbs);
+    } catch (e) {
+      setError(e.response?.data?.detail || e.message);
+    } finally {
+      setPbSubmitting(false);
+    }
+  };
+
+  const handleDeletePunishmentBong = async (id) => {
+    try {
+      await punishmentBongApi.delete(id);
+      setPunishmentBongs((prev) => prev.filter((pb) => pb.id !== id));
+    } catch (e) {
+      setError(e.response?.data?.detail || e.message);
+    }
+  };
+
+  // Compute per-player punishment bong tallies
+  const pbByPlayer = {};
+  for (const pb of punishmentBongs) {
+    if (!pbByPlayer[pb.player_id]) pbByPlayer[pb.player_id] = [];
+    pbByPlayer[pb.player_id].push(pb);
+  }
 
   if (loading) return <div className="p-6 text-muted-foreground">Loading...</div>;
   if (error) return <div className="p-6 text-destructive">Error: {error}</div>;
@@ -201,6 +255,121 @@ export default function GamesList() {
           </DialogContent>
         </Dialog>
       </div>
+
+      {/* Punishment Bongs */}
+      <Card className="mb-8">
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-lg">Punishment Bongs</CardTitle>
+            <Dialog open={pbDialogOpen} onOpenChange={setPbDialogOpen}>
+              <DialogTrigger asChild>
+                <Button size="sm" variant="outline">
+                  Give Punishment Bong
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Give Punishment Bong</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <div className="space-y-3">
+                    <Label>Player</Label>
+                    {teams.map((team) => {
+                      const players = [
+                        playerMap[team.player1_id],
+                        playerMap[team.player2_id],
+                      ].filter(Boolean);
+                      return (
+                        <div key={team.id}>
+                          <p className="mb-1.5 text-sm font-medium text-muted-foreground">
+                            {team.name}
+                          </p>
+                          <div className="flex gap-2">
+                            {players.map((p) => (
+                              <Button
+                                key={p.id}
+                                variant={pbPlayerId === p.id ? "default" : "outline"}
+                                className="flex-1"
+                                onClick={() => setPbPlayerId(p.id)}
+                              >
+                                {p.name}
+                              </Button>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <div>
+                    <Label>Note (optional)</Label>
+                    <Input
+                      className="mt-1"
+                      placeholder="Reason for punishment..."
+                      value={pbNote}
+                      onChange={(e) => setPbNote(e.target.value)}
+                    />
+                  </div>
+                  <Button
+                    className="w-full"
+                    disabled={!pbPlayerId || pbSubmitting}
+                    onClick={handleCreatePunishmentBong}
+                  >
+                    {pbSubmitting ? "Giving..." : "Give Punishment Bong"}
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {punishmentBongs.length === 0 ? (
+            <p className="text-sm text-muted-foreground">No punishment bongs yet.</p>
+          ) : (
+            <div className="space-y-3">
+              {Object.entries(pbByPlayer).map(([playerId, bongs]) => (
+                <div key={playerId}>
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="font-medium">
+                      {playerMap[playerId]?.name ?? "?"}
+                    </span>
+                    <Badge variant="destructive" className="text-xs">
+                      {bongs.length}
+                    </Badge>
+                  </div>
+                  <div className="space-y-1 pl-4">
+                    {bongs.map((pb) => (
+                      <div
+                        key={pb.id}
+                        className="flex items-center justify-between text-sm text-muted-foreground"
+                      >
+                        <span>
+                          {new Date(pb.timestamp).toLocaleTimeString([], {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
+                          {pb.note && (
+                            <span className="ml-2 text-foreground">
+                              — {pb.note}
+                            </span>
+                          )}
+                        </span>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-6 w-6 p-0 text-muted-foreground hover:text-destructive"
+                          onClick={() => handleDeletePunishmentBong(pb.id)}
+                        >
+                          ✕
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {games.length === 0 && (
         <p className="text-muted-foreground">No games yet. Add one to get started!</p>

@@ -4,7 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from .database import create_db_and_tables
-from .routers import games, players, shots, teams, tournaments
+from .routers import games, players, punishment_bongs, shots, teams, tournaments
 
 
 @asynccontextmanager
@@ -28,3 +28,4 @@ app.include_router(tournaments.router)
 app.include_router(teams.router)
 app.include_router(games.router)
 app.include_router(shots.router)
+app.include_router(punishment_bongs.router)

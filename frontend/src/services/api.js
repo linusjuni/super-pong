@@ -41,3 +41,11 @@ export const shotApi = {
   list: (gameId) => api.get(`/games/${gameId}/shots`).then((r) => r.data),
   delete: (id) => api.delete(`/shots/${id}`),
 };
+
+export const punishmentBongApi = {
+  create: (tournamentId, data) =>
+    api.post(`/tournaments/${tournamentId}/punishment-bongs`, data).then((r) => r.data),
+  list: (tournamentId) =>
+    api.get(`/tournaments/${tournamentId}/punishment-bongs`).then((r) => r.data),
+  delete: (id) => api.delete(`/punishment-bongs/${id}`),
+};

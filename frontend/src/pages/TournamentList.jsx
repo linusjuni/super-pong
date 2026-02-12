@@ -8,6 +8,7 @@ export default function TournamentList() {
   const [tournaments, setTournaments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [deletingId, setDeletingId] = useState(null);
 
   useEffect(() => {
     tournamentApi
@@ -16,6 +17,21 @@ export default function TournamentList() {
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false));
   }, []);
+
+  const handleDelete = async (e, id) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!window.confirm("Delete this tournament? This will delete all its teams, games, and shots. This cannot be undone.")) return;
+    setDeletingId(id);
+    try {
+      await tournamentApi.delete(id);
+      setTournaments((prev) => prev.filter((t) => t.id !== id));
+    } catch (e) {
+      setError(e.response?.data?.detail || e.message);
+    } finally {
+      setDeletingId(null);
+    }
+  };
 
   return (
     <div className="mx-auto max-w-4xl p-6">
@@ -42,7 +58,18 @@ export default function TournamentList() {
           <Link key={t.id} to={`/tournaments/${t.id}/games`}>
             <Card className="transition-colors hover:bg-accent">
               <CardHeader>
-                <CardTitle>{t.name}</CardTitle>
+                <div className="flex items-center justify-between">
+                  <CardTitle>{t.name}</CardTitle>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 w-7 p-0 text-muted-foreground hover:text-destructive"
+                    disabled={deletingId === t.id}
+                    onClick={(e) => handleDelete(e, t.id)}
+                  >
+                    {deletingId === t.id ? "…" : "✕"}
+                  </Button>
+                </div>
                 <CardDescription>
                   {new Date(t.created_at).toLocaleDateString()}
                 </CardDescription>

@@ -45,6 +45,7 @@ class Player(PlayerBase, table=True):
     created_at: datetime = Field(default_factory=_utcnow)
 
     shots: list["Shot"] = Relationship(back_populates="player")
+    punishment_bongs: list["PunishmentBong"] = Relationship(back_populates="player")
     teams_as_player1: list["Team"] = Relationship(
         back_populates="player1",
         sa_relationship_kwargs={"foreign_keys": "Team.player1_id"},
@@ -82,6 +83,10 @@ class Tournament(TournamentBase, table=True):
         sa_relationship_kwargs={"cascade": "all, delete-orphan"},
     )
     games: list["Game"] = Relationship(
+        back_populates="tournament",
+        sa_relationship_kwargs={"cascade": "all, delete-orphan"},
+    )
+    punishment_bongs: list["PunishmentBong"] = Relationship(
         back_populates="tournament",
         sa_relationship_kwargs={"cascade": "all, delete-orphan"},
     )
@@ -218,6 +223,7 @@ class ShotBase(SQLModel):
     outcome: ShotOutcome
     bounces: int | None = None
     elbow_violation: bool = False
+    cup_position: int | None = None
 
 
 class Shot(ShotBase, table=True):
@@ -236,6 +242,7 @@ class ShotCreate(SQLModel):
     outcome: ShotOutcome
     bounces: int | None = None
     elbow_violation: bool = False
+    cup_position: int | None = None
 
 
 class ShotPublic(SQLModel):
@@ -247,6 +254,39 @@ class ShotPublic(SQLModel):
     outcome: ShotOutcome
     bounces: int | None
     elbow_violation: bool
+    cup_position: int | None
+    timestamp: datetime
+
+
+# ============================================================
+# Punishment Bong
+# ============================================================
+
+
+class PunishmentBongBase(SQLModel):
+    player_id: int = Field(foreign_key="player.id")
+    note: str | None = None
+
+
+class PunishmentBong(PunishmentBongBase, table=True):
+    id: int | None = Field(default=None, primary_key=True)
+    tournament_id: int = Field(foreign_key="tournament.id", index=True)
+    timestamp: datetime = Field(default_factory=_utcnow)
+
+    tournament: Tournament = Relationship(back_populates="punishment_bongs")
+    player: Player = Relationship(back_populates="punishment_bongs")
+
+
+class PunishmentBongCreate(SQLModel):
+    player_id: int
+    note: str | None = None
+
+
+class PunishmentBongPublic(SQLModel):
+    id: int
+    tournament_id: int
+    player_id: int
+    note: str | None
     timestamp: datetime
 
 
@@ -305,3 +345,4 @@ Tournament.model_rebuild()
 Team.model_rebuild()
 Game.model_rebuild()
 Shot.model_rebuild()
+PunishmentBong.model_rebuild()
