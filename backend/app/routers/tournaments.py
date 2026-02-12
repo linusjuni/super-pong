@@ -7,7 +7,6 @@ from ..models import (
     Game,
     GameStatus,
     PlayerLeaderboardEntry,
-    Team,
     TeamStanding,
     Tournament,
     TournamentCreate,
