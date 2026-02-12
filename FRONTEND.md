@@ -12,7 +12,7 @@ The frontend is a **judge's clipboard**. It presents forms and lists — the hum
 
 - **TournamentList** — grid of tournament cards. Entry point.
 - **TournamentSetup** — create a tournament, its teams, and auto-generate round-robin games in one submit.
-- **GamesList** — all games for a tournament, grouped by team group (A/B). Add extra games manually.
+- **GamesList** — all games for a tournament, grouped by team group. Add extra games manually.
 - **GamePlay** — the shot-logging interface. Does not provide any validation, simply reflects the physical table.
 
 ## Tech Stack
