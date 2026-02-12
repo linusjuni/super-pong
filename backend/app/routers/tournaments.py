@@ -73,7 +73,7 @@ def get_tournament_stats(tournament_id: int, session: Session = Depends(get_sess
             FROM shot s
             JOIN game g ON s.game_id = g.id
             JOIN player p ON s.player_id = p.id
-            WHERE g.tournament_id = :tid
+            WHERE g.tournament_id = :tid AND s.shot_type != 'RERACK'
             GROUP BY p.id
             ORDER BY hits DESC, total_shots ASC
         """),

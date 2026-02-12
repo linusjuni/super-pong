@@ -11,12 +11,14 @@ class ShotType(str, Enum):
     NORMAL = "normal"
     BOUNCE = "bounce"
     TRICKSHOT = "trickshot"
+    RERACK = "rerack"
 
 
 class ShotOutcome(str, Enum):
     MISS = "miss"
     HIT = "hit"
     RIM = "rim"
+    NONE = "none"
 
 
 class GameStatus(str, Enum):
@@ -161,6 +163,7 @@ class Game(GameBase, table=True):
     tournament_id: int = Field(foreign_key="tournament.id", index=True)
     winner_id: int | None = Field(default=None, foreign_key="team.id")
     status: GameStatus = Field(default=GameStatus.NOT_STARTED)
+    started_at: datetime | None = Field(default=None)
 
     tournament: Tournament = Relationship(back_populates="games")
     team1: Team = Relationship(
@@ -189,6 +192,7 @@ class GameCreate(SQLModel):
 class GameUpdate(SQLModel):
     winner_id: int | None = None
     status: GameStatus | None = None
+    started_at: datetime | None = None
 
 
 class GamePublic(SQLModel):
@@ -199,6 +203,7 @@ class GamePublic(SQLModel):
     starting_cups_per_team: int
     winner_id: int | None
     status: GameStatus
+    started_at: datetime | None
 
 
 # ============================================================

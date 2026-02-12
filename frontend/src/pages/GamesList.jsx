@@ -184,12 +184,15 @@ export default function GamesList() {
               </div>
               <div>
                 <Label>Starting Cups</Label>
-                <Input
-                  type="number"
-                  value={newCups}
-                  onChange={(e) => setNewCups(parseInt(e.target.value) || 6)}
-                  className="mt-1"
-                />
+                <Select value={String(newCups)} onValueChange={(v) => setNewCups(parseInt(v))}>
+                  <SelectTrigger className="mt-1">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="6">6 cups</SelectItem>
+                    <SelectItem value="10">10 cups</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
               <Button onClick={handleCreateGame} disabled={creating || !newTeam1 || !newTeam2 || newTeam1 === newTeam2}>
                 {creating ? "Creating..." : "Create Game"}

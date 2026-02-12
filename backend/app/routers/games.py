@@ -1,8 +1,10 @@
+from datetime import datetime, timezone
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import Session, select
 
 from ..database import get_session
-from ..models import Game, GameCreate, GamePublic, GameUpdate, Tournament
+from ..models import Game, GameCreate, GamePublic, GameStatus, GameUpdate, Tournament
 
 router = APIRouter(tags=["games"])
 
@@ -48,7 +50,11 @@ def update_game(
     game = session.get(Game, game_id)
     if not game:
         raise HTTPException(404, "Game not found")
-    for key, value in body.model_dump(exclude_unset=True).items():
+    data = body.model_dump(exclude_unset=True)
+    # Auto-set started_at when transitioning to in_progress
+    if data.get("status") == GameStatus.IN_PROGRESS and game.started_at is None:
+        data["started_at"] = datetime.now(timezone.utc)
+    for key, value in data.items():
         setattr(game, key, value)
     session.add(game)
     session.commit()

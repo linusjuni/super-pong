@@ -61,7 +61,7 @@ def get_player_stats(player_id: int, session: Session = Depends(get_session)):
                 SUM(CASE WHEN shot_type = 'TRICKSHOT' THEN 1 ELSE 0 END)                     AS trickshot_total,
                 SUM(CASE WHEN elbow_violation = 1 THEN 1 ELSE 0 END) AS elbow_violations
             FROM shot
-            WHERE player_id = :pid
+            WHERE player_id = :pid AND shot_type != 'RERACK'
         """),
         {"pid": player_id},
     ).one()

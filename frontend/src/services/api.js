@@ -34,3 +34,10 @@ export const gameApi = {
   update: (id, data) => api.put(`/games/${id}`, data).then((r) => r.data),
   delete: (id) => api.delete(`/games/${id}`),
 };
+
+export const shotApi = {
+  create: (gameId, data) =>
+    api.post(`/games/${gameId}/shots`, data).then((r) => r.data),
+  list: (gameId) => api.get(`/games/${gameId}/shots`).then((r) => r.data),
+  delete: (id) => api.delete(`/shots/${id}`),
+};
