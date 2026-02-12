@@ -38,9 +38,7 @@ def create_punishment_bong(
     "/tournaments/{tournament_id}/punishment-bongs",
     response_model=list[PunishmentBongPublic],
 )
-def list_punishment_bongs(
-    tournament_id: int, session: Session = Depends(get_session)
-):
+def list_punishment_bongs(tournament_id: int, session: Session = Depends(get_session)):
     if not session.get(Tournament, tournament_id):
         raise HTTPException(404, "Tournament not found")
     return session.exec(

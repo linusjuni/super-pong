@@ -9,7 +9,9 @@ from ..models import Game, GameCreate, GamePublic, GameStatus, GameUpdate, Tourn
 router = APIRouter(tags=["games"])
 
 
-@router.post("/tournaments/{tournament_id}/games", response_model=GamePublic, status_code=201)
+@router.post(
+    "/tournaments/{tournament_id}/games", response_model=GamePublic, status_code=201
+)
 def create_game(
     tournament_id: int,
     body: GameCreate,
@@ -28,9 +30,7 @@ def create_game(
 def list_games(tournament_id: int, session: Session = Depends(get_session)):
     if not session.get(Tournament, tournament_id):
         raise HTTPException(404, "Tournament not found")
-    return session.exec(
-        select(Game).where(Game.tournament_id == tournament_id)
-    ).all()
+    return session.exec(select(Game).where(Game.tournament_id == tournament_id)).all()
 
 
 @router.get("/games/{game_id}", response_model=GamePublic)

@@ -8,6 +8,7 @@ dependencies = [
     "uvicorn[standard]",
     "sqlmodel",
     "python-multipart",
+    "ruff>=0.15.1",
 ]
 
 [tool.uv]

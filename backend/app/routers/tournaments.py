@@ -54,12 +54,16 @@ def get_tournament_stats(tournament_id: int, session: Session = Depends(get_sess
     if not tournament:
         raise HTTPException(404, "Tournament not found")
 
-    total_games = len(session.exec(
-        select(Game).where(Game.tournament_id == tournament_id)
-    ).all())
-    completed_games = len(session.exec(
-        select(Game).where(Game.tournament_id == tournament_id, Game.status == GameStatus.COMPLETED)
-    ).all())
+    total_games = len(
+        session.exec(select(Game).where(Game.tournament_id == tournament_id)).all()
+    )
+    completed_games = len(
+        session.exec(
+            select(Game).where(
+                Game.tournament_id == tournament_id, Game.status == GameStatus.COMPLETED
+            )
+        ).all()
+    )
 
     # Player leaderboard: all players who shot in this tournament's games
     leaderboard_rows = session.execute(
@@ -85,7 +89,9 @@ def get_tournament_stats(tournament_id: int, session: Session = Depends(get_sess
             player_name=r.player_name,
             total_shots=r.total_shots,
             hits=r.hits,
-            hit_percentage=round(r.hits / r.total_shots * 100, 1) if r.total_shots > 0 else 0.0,
+            hit_percentage=round(r.hits / r.total_shots * 100, 1)
+            if r.total_shots > 0
+            else 0.0,
         )
         for r in leaderboard_rows
     ]

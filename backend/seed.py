@@ -84,7 +84,9 @@ def seed():
             len(teams) * (len(teams) - 1) // 2 for teams in all_teams.values()
         )
         print(f"✓ Tournament '{TOURNAMENT_NAME}' (id={tournament.id})")
-        print(f"  {len(player_cache)} players, {sum(len(t) for t in all_teams.values())} teams, {total_games} games")
+        print(
+            f"  {len(player_cache)} players, {sum(len(t) for t in all_teams.values())} teams, {total_games} games"
+        )
 
 
 if __name__ == "__main__":

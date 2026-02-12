@@ -7,7 +7,9 @@ from ..models import Team, TeamCreate, TeamPublic, TeamUpdate, Tournament
 router = APIRouter(tags=["teams"])
 
 
-@router.post("/tournaments/{tournament_id}/teams", response_model=TeamPublic, status_code=201)
+@router.post(
+    "/tournaments/{tournament_id}/teams", response_model=TeamPublic, status_code=201
+)
 def create_team(
     tournament_id: int,
     body: TeamCreate,
@@ -26,9 +28,7 @@ def create_team(
 def list_teams(tournament_id: int, session: Session = Depends(get_session)):
     if not session.get(Tournament, tournament_id):
         raise HTTPException(404, "Tournament not found")
-    return session.exec(
-        select(Team).where(Team.tournament_id == tournament_id)
-    ).all()
+    return session.exec(select(Team).where(Team.tournament_id == tournament_id)).all()
 
 
 @router.put("/teams/{team_id}", response_model=TeamPublic)
