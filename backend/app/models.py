@@ -1,7 +1,19 @@
 from datetime import datetime, timezone
 from enum import Enum
+from typing import Annotated, Any
 
+from pydantic import BeforeValidator
 from sqlmodel import Field, Relationship, SQLModel
+
+
+def _ensure_utc(v: Any) -> Any:
+    """Attach UTC tzinfo to naive datetimes (e.g. loaded from SQLite)."""
+    if isinstance(v, datetime) and v.tzinfo is None:
+        return v.replace(tzinfo=timezone.utc)
+    return v
+
+
+UTCDatetime = Annotated[datetime, BeforeValidator(_ensure_utc)]
 
 
 # --- Enums ---
@@ -42,7 +54,7 @@ class PlayerBase(SQLModel):
 
 class Player(PlayerBase, table=True):
     id: int | None = Field(default=None, primary_key=True)
-    created_at: datetime = Field(default_factory=_utcnow)
+    created_at: UTCDatetime = Field(default_factory=_utcnow)
 
     shots: list["Shot"] = Relationship(back_populates="player")
     punishment_bongs: list["PunishmentBong"] = Relationship(back_populates="player")
@@ -62,7 +74,7 @@ class PlayerCreate(PlayerBase):
 
 class PlayerPublic(PlayerBase):
     id: int
-    created_at: datetime
+    created_at: UTCDatetime
 
 
 # ============================================================
@@ -76,7 +88,7 @@ class TournamentBase(SQLModel):
 
 class Tournament(TournamentBase, table=True):
     id: int | None = Field(default=None, primary_key=True)
-    created_at: datetime = Field(default_factory=_utcnow)
+    created_at: UTCDatetime = Field(default_factory=_utcnow)
 
     teams: list["Team"] = Relationship(
         back_populates="tournament",
@@ -98,7 +110,7 @@ class TournamentCreate(TournamentBase):
 
 class TournamentPublic(TournamentBase):
     id: int
-    created_at: datetime
+    created_at: UTCDatetime
 
 
 # ============================================================
@@ -168,7 +180,7 @@ class Game(GameBase, table=True):
     tournament_id: int = Field(foreign_key="tournament.id", index=True)
     winner_id: int | None = Field(default=None, foreign_key="team.id")
     status: GameStatus = Field(default=GameStatus.NOT_STARTED)
-    started_at: datetime | None = Field(default=None)
+    started_at: UTCDatetime | None = Field(default=None)
 
     tournament: Tournament = Relationship(back_populates="games")
     team1: Team = Relationship(
@@ -197,7 +209,7 @@ class GameCreate(SQLModel):
 class GameUpdate(SQLModel):
     winner_id: int | None = None
     status: GameStatus | None = None
-    started_at: datetime | None = None
+    started_at: UTCDatetime | None = None
 
 
 class GamePublic(SQLModel):
@@ -208,7 +220,7 @@ class GamePublic(SQLModel):
     starting_cups_per_team: int
     winner_id: int | None
     status: GameStatus
-    started_at: datetime | None
+    started_at: UTCDatetime | None
 
 
 # ============================================================
@@ -229,7 +241,7 @@ class ShotBase(SQLModel):
 class Shot(ShotBase, table=True):
     id: int | None = Field(default=None, primary_key=True)
     game_id: int = Field(foreign_key="game.id", index=True)
-    timestamp: datetime = Field(default_factory=_utcnow)
+    timestamp: UTCDatetime = Field(default_factory=_utcnow)
 
     game: Game = Relationship(back_populates="shots")
     player: Player = Relationship(back_populates="shots")
@@ -255,7 +267,7 @@ class ShotPublic(SQLModel):
     bounces: int | None
     elbow_violation: bool
     cup_position: int | None
-    timestamp: datetime
+    timestamp: UTCDatetime
 
 
 # ============================================================
@@ -271,7 +283,7 @@ class PunishmentBongBase(SQLModel):
 class PunishmentBong(PunishmentBongBase, table=True):
     id: int | None = Field(default=None, primary_key=True)
     tournament_id: int = Field(foreign_key="tournament.id", index=True)
-    timestamp: datetime = Field(default_factory=_utcnow)
+    timestamp: UTCDatetime = Field(default_factory=_utcnow)
 
     tournament: Tournament = Relationship(back_populates="punishment_bongs")
     player: Player = Relationship(back_populates="punishment_bongs")
@@ -287,7 +299,7 @@ class PunishmentBongPublic(SQLModel):
     tournament_id: int
     player_id: int
     note: str | None
-    timestamp: datetime
+    timestamp: UTCDatetime
 
 
 # ============================================================
