@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+# Start both the SuperPong backend and frontend with a single command.
+# Usage: ./play
+
+set -e
+
+ROOT="$(cd "$(dirname "$0")" && pwd)"
+
+cleanup() {
+  echo ""
+  echo "Stopping SuperPong..."
+  kill $BACKEND_PID $FRONTEND_PID 2>/dev/null
+  wait $BACKEND_PID $FRONTEND_PID 2>/dev/null
+  echo "Done."
+}
+trap cleanup EXIT INT TERM
+
+# --- Backend ---
+echo "Starting backend (uvicorn) on port 8000..."
+cd "$ROOT/backend"
+uv run uvicorn app.main:app --reload &
+BACKEND_PID=$!
+
+# --- Frontend ---
+echo "Starting frontend (vite) on port 5173..."
+cd "$ROOT/frontend"
+npm run dev &
+FRONTEND_PID=$!
+
+echo ""
+echo "🏓 SuperPong is running!"
+echo "   Frontend → http://localhost:5173"
+echo "   Backend  → http://localhost:8000"
+echo "   API docs → http://localhost:8000/docs"
+echo ""
+echo "Press Ctrl+C to stop both."
+
+wait
