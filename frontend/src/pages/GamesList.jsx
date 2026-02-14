@@ -48,6 +48,7 @@ export default function GamesList() {
   const [pbPlayerId, setPbPlayerId] = useState(null);
   const [pbNote, setPbNote] = useState("");
   const [pbSubmitting, setPbSubmitting] = useState(false);
+  const [pbExpanded, setPbExpanded] = useState(false);
 
   // Delete game
   const [deletingId, setDeletingId] = useState(null);
@@ -178,18 +179,21 @@ export default function GamesList() {
     }
   };
 
-  // Compute per-player punishment bong tallies
+  // Compute per-player punishment bong tallies, sorted by count descending
   const pbByPlayer = {};
   for (const pb of punishmentBongs) {
     if (!pbByPlayer[pb.player_id]) pbByPlayer[pb.player_id] = [];
     pbByPlayer[pb.player_id].push(pb);
   }
+  const pbByPlayerSorted = Object.entries(pbByPlayer).sort(
+    ([, a], [, b]) => b.length - a.length
+  );
 
   if (loading) return <div className="p-6 text-muted-foreground">Loading...</div>;
   if (error) return <div className="p-6 text-destructive">Error: {error}</div>;
 
   return (
-    <div className="mx-auto max-w-4xl p-6">
+    <div className="mx-auto max-w-5xl p-6">
       <div className="mb-8 flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Button variant="ghost" asChild>
@@ -260,7 +264,20 @@ export default function GamesList() {
       <Card className="mb-8">
         <CardHeader>
           <div className="flex items-center justify-between">
-            <CardTitle className="text-lg">Punishment Bongs</CardTitle>
+            <button
+              className="flex items-center gap-2 cursor-pointer"
+              onClick={() => setPbExpanded((prev) => !prev)}
+            >
+              <CardTitle className="text-lg">Punishment Bongs</CardTitle>
+              {punishmentBongs.length > 0 && (
+                <Badge variant="destructive" className="text-xs">
+                  {punishmentBongs.length}
+                </Badge>
+              )}
+              <span className="text-muted-foreground text-sm">
+                {pbExpanded ? "▲" : "▼"}
+              </span>
+            </button>
             <Dialog open={pbDialogOpen} onOpenChange={setPbDialogOpen}>
               <DialogTrigger asChild>
                 <Button size="sm" variant="outline">
@@ -305,6 +322,7 @@ export default function GamesList() {
                     <Input
                       className="mt-1"
                       placeholder="Reason for punishment..."
+                      maxLength={100}
                       value={pbNote}
                       onChange={(e) => setPbNote(e.target.value)}
                     />
@@ -321,54 +339,56 @@ export default function GamesList() {
             </Dialog>
           </div>
         </CardHeader>
-        <CardContent>
-          {punishmentBongs.length === 0 ? (
-            <p className="text-sm text-muted-foreground">No punishment bongs yet.</p>
-          ) : (
-            <div className="space-y-3">
-              {Object.entries(pbByPlayer).map(([playerId, bongs]) => (
-                <div key={playerId}>
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="font-medium">
-                      {playerMap[playerId]?.name ?? "?"}
-                    </span>
-                    <Badge variant="destructive" className="text-xs">
-                      {bongs.length}
-                    </Badge>
-                  </div>
-                  <div className="space-y-1 pl-4">
-                    {bongs.map((pb) => (
-                      <div
-                        key={pb.id}
-                        className="flex items-center justify-between text-sm text-muted-foreground"
-                      >
-                        <span>
-                          {new Date(pb.timestamp).toLocaleTimeString([], {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })}
-                          {pb.note && (
-                            <span className="ml-2 text-foreground">
-                              — {pb.note}
-                            </span>
-                          )}
-                        </span>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-6 w-6 p-0 text-muted-foreground hover:text-destructive"
-                          onClick={() => handleDeletePunishmentBong(pb.id)}
+        {pbExpanded && (
+          <CardContent>
+            {punishmentBongs.length === 0 ? (
+              <p className="text-sm text-muted-foreground">No punishment bongs yet.</p>
+            ) : (
+              <div className="space-y-3">
+                {pbByPlayerSorted.map(([playerId, bongs]) => (
+                  <div key={playerId}>
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="font-medium">
+                        {playerMap[playerId]?.name ?? "?"}
+                      </span>
+                      <Badge variant="destructive" className="text-xs">
+                        {bongs.length}
+                      </Badge>
+                    </div>
+                    <div className="space-y-1 pl-4">
+                      {bongs.map((pb) => (
+                        <div
+                          key={pb.id}
+                          className="flex items-center justify-between text-sm text-muted-foreground"
                         >
-                          ✕
-                        </Button>
-                      </div>
-                    ))}
+                          <span>
+                            {new Date(pb.timestamp).toLocaleTimeString([], {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })}
+                            {pb.note && (
+                              <span className="ml-2 text-foreground">
+                                — {pb.note}
+                              </span>
+                            )}
+                          </span>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-6 w-6 p-0 text-muted-foreground hover:text-destructive"
+                            onClick={() => handleDeletePunishmentBong(pb.id)}
+                          >
+                            ✕
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        )}
       </Card>
 
       {games.length === 0 && (

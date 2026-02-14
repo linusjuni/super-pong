@@ -18,6 +18,7 @@ export const tournamentApi = {
   delete: (id) => api.delete(`/tournaments/${id}`),
   getTeams: (id) => api.get(`/tournaments/${id}/teams`).then((r) => r.data),
   getGames: (id) => api.get(`/tournaments/${id}/games`).then((r) => r.data),
+  getDashboard: (id) => api.get(`/tournaments/${id}/dashboard`).then((r) => r.data),
 };
 
 export const teamApi = {

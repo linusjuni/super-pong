@@ -3,6 +3,7 @@ import TournamentList from "./pages/TournamentList";
 import TournamentSetup from "./pages/TournamentSetup";
 import GamesList from "./pages/GamesList";
 import GamePlay from "./pages/GamePlay";
+import StatsDashboard from "./pages/StatsDashboard";
 
 function App() {
   return (
@@ -12,6 +13,7 @@ function App() {
         <Route path="/tournaments/new" element={<TournamentSetup />} />
         <Route path="/tournaments/:tournamentId/games" element={<GamesList />} />
         <Route path="/tournaments/:tournamentId/games/:gameId" element={<GamePlay />} />
+        <Route path="/tournaments/:tournamentId/stats" element={<StatsDashboard />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>

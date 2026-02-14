@@ -324,19 +324,33 @@ class PlayerStats(SQLModel):
     elbow_violations: int
 
 
-class PlayerLeaderboardEntry(SQLModel):
+class PlayerEntry(SQLModel):
     player_id: int
     player_name: str
     total_shots: int
     hits: int
+    misses: int
+    rims: int
     hit_percentage: float
+    elbow_violations: int
+    bounce_shots: int
+    bounce_total: int
+    normal_hits: int
+    normal_total: int
+    bounce_hits: int
+    trickshot_hits: int
+    trickshot_total: int
+    bounce_cups_removed: int
 
 
 class TeamStanding(SQLModel):
     team_id: int
     team_name: str
+    player1_id: int
+    player2_id: int
     player1_name: str
     player2_name: str
+    group: str | None = None
     wins: int
     losses: int
     games_played: int
@@ -347,8 +361,47 @@ class TournamentStats(SQLModel):
     tournament_name: str
     total_games: int
     completed_games: int
-    player_leaderboard: list[PlayerLeaderboardEntry]
+    player_leaderboard: list[PlayerEntry]
     team_standings: list[TeamStanding]
+
+
+class CupHeatmapEntry(SQLModel):
+    player_id: int
+    cup_position: int
+    hits: int
+
+
+class PunishmentCount(SQLModel):
+    player_id: int
+    player_name: str
+    count: int
+
+
+class RecentPunishment(SQLModel):
+    player_name: str
+    note: str | None
+    timestamp: UTCDatetime
+
+
+class HotHandEntry(SQLModel):
+    player_id: int
+    longest_hit_streak: int
+    longest_miss_streak: int
+
+
+class DashboardStats(SQLModel):
+    tournament_id: int
+    tournament_name: str
+    total_games: int
+    completed_games: int
+    in_progress_games: int
+    team_standings: list[TeamStanding]
+    player_leaderboard: list[PlayerEntry]
+    cup_heatmap: list[CupHeatmapEntry]
+    total_punishments: int
+    punishment_counts: list[PunishmentCount]
+    recent_punishments: list[RecentPunishment]
+    hot_hand: list[HotHandEntry]
 
 
 # Rebuild models for forward reference resolution
