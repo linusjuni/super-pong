@@ -18,7 +18,7 @@ trap cleanup EXIT INT TERM
 # --- Backend ---
 echo "Starting backend (uvicorn) on port 8000..."
 cd "$ROOT/backend"
-uv run uvicorn app.main:app --reload &
+uv run --package super-pong-backend uvicorn app.main:app --reload &
 BACKEND_PID=$!
 
 # --- Frontend ---
