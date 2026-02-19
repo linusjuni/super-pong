@@ -10,12 +10,14 @@ os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 
 import cv2
 from detector import PoseDetector
+from gesture import GestureDetector
 from violation import check_violation
 import renderer
 
 CAMERA_WIDTH = 1280
 CAMERA_HEIGHT = 720
 REPLAY_BUFFER_SIZE = 300  # ~10s at 30fps
+PUNISHMENT_DURATION = 90  # ~3s at 30fps
 OUTPUT_WIDTH = 1920
 OUTPUT_HEIGHT = 1080
 MAX_CAMERA_PROBE = 8
@@ -101,6 +103,7 @@ def select_camera():
 class ElbowTracker:
     def __init__(self, camera_index=0):
         self.detector = PoseDetector()
+        self.gesture_detector = GestureDetector()
         self.table_edge_x = None
         self.calibrating = True
         self.camera_index = camera_index
@@ -110,6 +113,7 @@ class ElbowTracker:
         self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, CAMERA_HEIGHT)
         self.frame_buffer = collections.deque(maxlen=REPLAY_BUFFER_SIZE)
         self.window_name = f"Elbow Tracker - Camera {camera_index}"
+        self.punishment_timer = 0
 
     def on_mouse(self, event, x, y, flags, param):
         """Handle mouse clicks, scaling from output image space to camera frame space."""
@@ -156,6 +160,13 @@ class ElbowTracker:
             renderer.draw_table_edge(frame, self.table_edge_x)
             renderer.draw_status(frame, self.calibrating)
 
+            # Easter egg: middle finger triggers punishment bong
+            if self.gesture_detector.detect_middle_finger(frame):
+                self.punishment_timer = PUNISHMENT_DURATION
+            if self.punishment_timer > 0:
+                renderer.draw_punishment(frame)
+                self.punishment_timer -= 1
+
             # Push the fully rendered frame into the replay buffer
             self.frame_buffer.append(frame.copy())
 
@@ -179,6 +190,7 @@ class ElbowTracker:
 
         self.cap.release()
         self.detector.close()
+        self.gesture_detector.close()
         cv2.destroyAllWindows()
 
 

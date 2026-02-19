@@ -137,3 +137,25 @@ def compose_pip(replay_frame, live_frame, screen_w, screen_h):
     canvas[y1:y1 + pip_h, x1:x1 + pip_w] = pip
 
     return canvas
+
+
+def draw_punishment(frame):
+    """Draw a 'PUNISHMENT BONG!' overlay centered on the frame."""
+    h, w = frame.shape[:2]
+    overlay = frame.copy()
+    cv2.rectangle(overlay, (0, h // 3), (w, 2 * h // 3), (0, 0, 0), -1)
+    cv2.addWeighted(overlay, 0.7, frame, 0.3, 0, frame)
+
+    text = "PUNISHMENT BONG"
+    (tw, th), _ = cv2.getTextSize(text, cv2.FONT_HERSHEY_SIMPLEX, 2.5, 4)
+    x = (w - tw) // 2
+    y = (h + th) // 2 - 20
+    cv2.putText(frame, text, (x, y),
+                cv2.FONT_HERSHEY_SIMPLEX, 2.5, RED, 4)
+
+    sub = "Don't disrespect the elbow tracker!"
+    (sw, sh), _ = cv2.getTextSize(sub, cv2.FONT_HERSHEY_SIMPLEX, 1.0, 2)
+    cv2.putText(frame, sub, ((w - sw) // 2, y + th + 30),
+                cv2.FONT_HERSHEY_SIMPLEX, 1.0, WHITE, 2)
+
+
